@@ -1,6 +1,10 @@
 # test_app_java
 测试flutter app后端
 
+## api文档位置
+本地启动后
+http://localhost:8080/swagger-ui.html
+
 安装
 ------
 数据库配置文件位置：/src/main/java/com.example.demo/DemoApplication
