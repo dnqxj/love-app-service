@@ -32,5 +32,4 @@ public class UserModel {
     private Long createTime;
     @Column(name = "update_time")
     private Long updateTime;
-
 }

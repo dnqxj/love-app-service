@@ -3,11 +3,13 @@ package com.example.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.example.demo.model.LoveDateModel;
 import com.llqqww.thinkjdbc.D;
+import io.swagger.annotations.Api;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Api(tags = "日期提醒")
 @RestController
 @RequestMapping("/love")
 public class Love {

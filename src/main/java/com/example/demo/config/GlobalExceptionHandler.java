@@ -1,4 +1,4 @@
-package com.example.demo.common;
+package com.example.demo.config;
 
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.validation.BindException;
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
             json.put("message", errorList.get(0));
         }
         json.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-        json.put("status", "error");
+        json.put("success", false);
         return json;
     }
 
@@ -83,8 +83,8 @@ public class GlobalExceptionHandler {
         json.put("retMes",e.getMessage());
         json.put("path", req.getRequestURI());
         json.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-        json.put("status", "error");
         json.put("message", e.getMessage());
+        json.put("success", false);
         return json;
     }
 }

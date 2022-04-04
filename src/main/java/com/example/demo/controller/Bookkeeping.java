@@ -4,6 +4,7 @@ import com.example.demo.model.BookkeepingModel;
 import com.example.demo.model.KeepItemModel;
 import com.example.demo.model.UserModel;
 import com.llqqww.thinkjdbc.D;
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.lang.reflect.Array;
 import java.util.*;
 
+@Api(tags = "记账模块")
 @RestController
 @RequestMapping("/bookkeeping")
 public class Bookkeeping {
