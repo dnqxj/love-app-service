@@ -1,8 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.BookkeepingModel;
+import com.example.demo.model.BookeepModel;
 import com.example.demo.model.KeepItemModel;
-import com.example.demo.model.UserModel;
 import com.llqqww.thinkjdbc.D;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,21 +9,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 @Api(tags = "记账模块")
 @RestController
-@RequestMapping("/bookkeeping")
-public class Bookkeeping {
+@RequestMapping("/bookeep")
+public class Bookeep {
 
     @GetMapping(path = "/item")
     public HashMap<String, Object> item() {
 //        默认用户1
         int uid = 1;
-        List<BookkeepingModel> list = new ArrayList<>();
+        List<BookeepModel> list = new ArrayList<>();
         try {
-            list = D.M(BookkeepingModel.class).where("uid=?", uid).select();
+            list = D.M(BookeepModel.class).where("uid=?", uid).select();
         } catch (Exception e) {
             e.printStackTrace();
         }

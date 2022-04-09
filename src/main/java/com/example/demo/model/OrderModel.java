@@ -12,8 +12,7 @@ public class OrderModel {
 
     @Column(isKey = true)
     private Long id;
-    @Column(name = "user_id")
-    private Long userId;
+    private Long uid;
     private Long gid;
     private Double price;
     private Long count;

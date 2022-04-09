@@ -12,7 +12,7 @@ import java.util.*;
 @Api(tags = "日期提醒")
 @RestController
 @RequestMapping("/love")
-public class Love {
+public class DateReminder {
 
     @GetMapping(path = "date_list")
     public HashMap<String, Object> dateList() {

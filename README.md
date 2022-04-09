@@ -37,8 +37,9 @@ password: CkLGfTMTn8e4z2WZ
 线上运行地址
 ------
 app.orangemust.com
-/say?name=... 可测试
+/hello 可测试，将返回"Hello World"
 
 日志
 --------------
 2022-3-27 一个demo版本的上传
+2022-4-09 处理上传文件的路径和返回

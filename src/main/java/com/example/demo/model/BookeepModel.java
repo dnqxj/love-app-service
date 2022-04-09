@@ -7,8 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Table(name = "t_bookkeeping")
-public class BookkeepingModel {
+@Table(name = "t_bookeep")
+public class BookeepModel {
     @Column(isKey = true)
     private Long id;
     private Long uid;

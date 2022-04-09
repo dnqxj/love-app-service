@@ -115,6 +115,8 @@ public class User {
 
         if (userModel != null) {
             HashMap<String, Object> hashMap = new HashMap<>();
+            // 清空密码
+            userModel.setPassword("");
             hashMap.put("user", userModel);
             return Result.ok().data(hashMap);
         } else {
