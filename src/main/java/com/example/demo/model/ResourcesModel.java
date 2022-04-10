@@ -15,6 +15,8 @@ public class ResourcesModel {
 
     private Long uid;
 
+    private String uuid;
+
     @Column(name = "original_name")
     private String originalName;
 

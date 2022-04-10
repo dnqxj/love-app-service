@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.model.UserModel;
 import com.example.demo.response.Result;
+import com.example.demo.utils.FuncUtil;
+import com.example.demo.utils.JwtUtil;
 import com.example.demo.validate.LoginReqVo;
 import com.example.demo.validate.RegisterReqVo;
 import com.llqqww.thinkjdbc.D;
@@ -10,11 +12,9 @@ import org.springframework.util.DigestUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import com.example.demo.utils.JwtUtil;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 
 @Api(tags = "用户管理")
 @RequestMapping(path = "/user")
@@ -69,7 +69,7 @@ public class User {
             return Result.error().message("用户名已注册");
         }
 
-        Long timestamp = this.getTimeStamp();
+        Long timestamp = FuncUtil.getTimeStamp();
         String password = registerReqVo.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
         UserModel newUserModel = new UserModel();
@@ -125,11 +125,4 @@ public class User {
 
     }
 
-
-    /**
-     * 获取精确到秒的时间戳
-     */
-    public static Long getTimeStamp(){
-        return Long.valueOf(System.currentTimeMillis()/1000);
-    }
 }

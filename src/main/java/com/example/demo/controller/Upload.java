@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.ResourcesModel;
 import com.example.demo.response.Result;
+import com.example.demo.utils.FuncUtil;
 import com.llqqww.thinkjdbc.D;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,15 +48,17 @@ public class Upload {
 //            保存到数据库
             Object userId = request.getAttribute("userId");
             long uid = Long.valueOf(String.valueOf(userId));
+            String uuid = FuncUtil.getUUID();
 
             ResourcesModel resourcesModel = new ResourcesModel();
             resourcesModel.setUid(uid);
+            resourcesModel.setUuid(uuid);
             resourcesModel.setOriginalName(map.get("original_name").toString());
             resourcesModel.setName(map.get("name").toString());
             resourcesModel.setUrlPath(map.get("url_path").toString());
             resourcesModel.setPath(map.get("path").toString());
             resourcesModel.setExt(map.get("ext").toString());
-            resourcesModel.setCreateTime(getTimeStamp());
+            resourcesModel.setCreateTime(FuncUtil.getTimeStamp());
             long id = 0;
             try {
                 id = D.M(resourcesModel).add();
@@ -64,6 +67,7 @@ public class Upload {
             }
 
             if(id != 0) {
+                map.put("uuid", uuid);
                 return Result.ok().message("上传成功").data(map);
             } else {
                 return Result.error().message("上传失败");
@@ -133,12 +137,4 @@ public class Upload {
         String extension = filename.substring(filename.lastIndexOf("."));
         return extension;
     }
-
-    /**
-     * 获取精确到秒的时间戳
-     */
-    public static Long getTimeStamp(){
-        return Long.valueOf(System.currentTimeMillis()/1000);
-    }
-
 }

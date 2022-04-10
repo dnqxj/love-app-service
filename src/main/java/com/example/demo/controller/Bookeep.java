@@ -1,128 +1,218 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.BookeepModel;
-import com.example.demo.model.KeepItemModel;
+import com.example.demo.model.response.BookeepDayModel;
+import com.example.demo.model.response.BookeepMonthDetailsModel;
+import com.example.demo.model.response.BookeepMonthInfoModel;
+import com.example.demo.response.Result;
+import com.example.demo.swagger.annotation.ApiGroup;
+import com.example.demo.utils.FuncUtil;
+import com.example.demo.validate.group.BookeepGroups;
 import com.llqqww.thinkjdbc.D;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 @Api(tags = "记账模块")
 @RestController
 @RequestMapping("/bookeep")
 public class Bookeep {
 
-    @GetMapping(path = "/item")
-    public HashMap<String, Object> item() {
-//        默认用户1
-        int uid = 1;
-        List<BookeepModel> list = new ArrayList<>();
+    @ApiResponses({
+            @ApiResponse(code = 200,message = "OK",response = BookeepMonthDetailsModel.class),
+    })
+    @ApiOperation(value = "查询月份详情")
+    @GetMapping(path = "/month_details")
+    public Result monthDetails(
+            @ApiGroup(BookeepGroups.MonthDetails.class)
+            @Validated(BookeepGroups.MonthDetails.class)
+            @RequestBody BookeepModel bookeepModel,
+            HttpServletRequest request
+    ) {
+        // 用户ID
+        Long uid = FuncUtil.getUid(request);
+        Integer year = bookeepModel.getYear();
+        Integer month = bookeepModel.getMonth();
+        List<BookeepModel> list = null;
         try {
-            list = D.M(BookeepModel.class).where("uid=?", uid).select();
+            list = D.M(BookeepModel.class).where("uid=? and year=? and month=?", uid, year, month).select();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        HashMap<String, Object> hashMap = new HashMap<>();
-        if (list.size() > 0) {
-            List newList = new ArrayList<>();
-            KeepItemModel keepItemModel = new KeepItemModel();
+        if(list == null) {
+            return Result.error().message("获取失败，请刷新重试");
+        }
 
-            keepItemModel.setName("工资");
-            keepItemModel.setDesc("发工资咯");
-            keepItemModel.setAction(1); // 支出
-            keepItemModel.setMoney(2100.34);
-            keepItemModel.setDate("2022-03-15");
-            List<KeepItemModel> keepItemModelList = new ArrayList<KeepItemModel>();
-            keepItemModelList.add(keepItemModel);
-            keepItemModelList.add(keepItemModel);
-            keepItemModelList.add(keepItemModel);
-            for (int i = 0; i < list.size(); i++) {
-                HashMap<String, Object> newHashMap = new HashMap<>();
-                newHashMap.put("dayData", list.get(i));
-                newHashMap.put("children", keepItemModelList);
-                newList.add(newHashMap);
+        // 处理list，返回前端所需的数据结构
+        BookeepMonthInfoModel info = new BookeepMonthInfoModel();
+        info.setYear(year);
+        info.setMonth(month);
+        Double expenditureTotla = 0.0;
+        Double incomeTotla = 0.0;
+        // 处理list，整合同一天的数据
+        List<BookeepDayModel> dayList = new ArrayList<>();
+        HashMap<String, BookeepDayModel> dayMap = new HashMap<>();
+        for (int i=0;i<list.size(); i++) {
+            // 统计当月总和
+            BookeepModel bookeepModelItem = list.get(i);
+            if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                expenditureTotla += bookeepModelItem.getTotal();
+            } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
+                incomeTotla += bookeepModelItem.getTotal();
             }
-//            该月的收支数据
-            HashMap<String, Object> monthHashMap = new HashMap<>();
-            monthHashMap.put("month", 3);
-            monthHashMap.put("budget", 2000);
-            monthHashMap.put("income", 453);
-            monthHashMap.put("expenditure", 600);
-            HashMap<String, Object> resultHashMap = new HashMap<>();
-            resultHashMap.put("list", newList);
-            resultHashMap.put("monthData", monthHashMap);
 
-            hashMap.put("status", "success");
-            hashMap.put("message", "获取成功");
-            hashMap.put("data", resultHashMap);
-        } else {
-            List<String> nulList = new ArrayList<String>();
-            HashMap<String, Object> nullMap = new HashMap<>();
-            hashMap.put("status", "success");
-            hashMap.put("message", "获取失败");
-            hashMap.put("data", nulList);
+
+            String date = year.toString()  + '-' + month.toString() + '-' + bookeepModelItem.getDay().toString();
+            BookeepDayModel bookeepDayModel = new BookeepDayModel();
+            // 该日期没有数据
+            if(dayMap.get(date) == null) {
+                bookeepDayModel.setDate(date);
+                if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                    bookeepDayModel.setExpenditure(bookeepModelItem.getTotal());
+                    bookeepDayModel.setIncome(0.0);
+                } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
+                    bookeepDayModel.setIncome(bookeepModelItem.getTotal());
+                    bookeepDayModel.setExpenditure(0.0);
+                }
+                List<BookeepModel> children = new ArrayList<>();
+                children.add(bookeepModelItem);
+                bookeepDayModel.setChildren(children);
+                dayMap.put(date, bookeepDayModel);
+            } else {
+                // 循环中已存在该日期的数据
+                bookeepDayModel = dayMap.get(date);
+                if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                    // 累加数据
+                    bookeepDayModel.setExpenditure(bookeepDayModel.getExpenditure() + bookeepModelItem.getTotal());
+                } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
+                    bookeepDayModel.setIncome(bookeepDayModel.getIncome() + bookeepModelItem.getTotal());
+                }
+                bookeepDayModel.getChildren().add(bookeepModelItem);
+                dayMap.replace(date, bookeepDayModel);
+            }
         }
-        return hashMap;
-    }
 
-    @GetMapping(path = "/model_list")
-    public HashMap<String, Object> getModelList(Integer type) {
-        List list = new ArrayList();
-        if (type == 0) {
-            list.add("长辈");
-            list.add("小孩");
-            list.add("女朋友");
-        } else if (type == 1) {
-            list.add("餐饮");
-            list.add("出行");
-            list.add("社交");
+        // 将处理后的日期：对象 数据，放到列表中
+        for (String key : dayMap.keySet()) {
+            dayList.add(dayMap.get(key));
         }
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", "success");
-        hashMap.put("message", "获取成功");
-        hashMap.put("data", list);
-        return hashMap;
-    }
-
-    @PostMapping(path = "/add_item")
-    public HashMap<String, Object> addItem() {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", "success");
-        hashMap.put("message", "新增成功");
-        return hashMap;
-    }
-
-    @PostMapping(path = "/update_file")
-    public HashMap<String, Object> updateFile() {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", "success");
-        hashMap.put("message", "上传成功");
-        return hashMap;
-    }
-
-    @GetMapping(path = "/get_images")
-    public HashMap<String, Object> getImages() {
-        HashMap<String, Object> imageHashMap = new HashMap<>();
-        imageHashMap.put("id", 1);
-        imageHashMap.put("name", "海边图片");
-        imageHashMap.put("url", "http://www-x-kmwhjj-x-cn.img.abc188.com/uploads/avatar/8f71357b9bcf4fc615f1beb1c96fdaa3.png");
-        List<Map> list = new ArrayList<>();
-        list.add(imageHashMap);
-        list.add(imageHashMap);
-        list.add(imageHashMap);
-        list.add(imageHashMap);
-        list.add(imageHashMap);
+        info.setExpenditureTotla(expenditureTotla);
+        info.setIncomeTotla(incomeTotla);
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", "success");
-        hashMap.put("message", "获取成功");
-        hashMap.put("data", list);
-        return hashMap;
+//        hashMap.put("list", list);
+        hashMap.put("info", info);
+        hashMap.put("dayList", dayList);
+        return Result.ok().data(hashMap);
     }
 
+    // 新增账务记录
+    @ApiOperation(value = "新增账务记录")
+    @PostMapping("add")
+    public Result add(
+            @ApiGroup(BookeepGroups.Insert.class)
+            @Validated(BookeepGroups.Insert.class)
+            @RequestBody BookeepModel bookeepModel,
+            HttpServletRequest request
+    ) {
+        Long uid = FuncUtil.getUid(request);
+        String type = bookeepModel.getType();
+        if(!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
+            return Result.error().message("财务类型错误");
+        }
+        Long timeStamp = FuncUtil.getTimeStamp();
+        // 避免ID攻击
+        bookeepModel.setId(null);
+        bookeepModel.setUid(uid);
+        bookeepModel.setCreateTime(timeStamp);
+        bookeepModel.setUpdateTime(timeStamp);
+        Long insertNum = null;
+        try {
+            insertNum = D.M(bookeepModel).add();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(insertNum == null) {
+            return Result.error().message("新增记录失败~");
+        }
+        return Result.ok().message("新增成功~");
+    }
 
+    // 修改
+    @ApiOperation(value = "修改账务记录")
+    @PostMapping("update")
+    public Result update(
+            @ApiGroup(BookeepGroups.Update.class)
+            @Validated(BookeepGroups.Update.class)
+            @RequestBody BookeepModel bookeepModel,
+            HttpServletRequest request
+    ) {
+        Long uid = FuncUtil.getUid(request);
+        String type = bookeepModel.getType();
+        if(!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
+            return Result.error().message("财务类型错误");
+        }
+        Long timeStamp = FuncUtil.getTimeStamp();
+        Long id = bookeepModel.getId();
+        BookeepModel oldBookeepModel = null;
+        try {
+            oldBookeepModel = D.M(BookeepModel.class).where("id=? and uid=?", id, uid).find();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(oldBookeepModel == null) {
+            return Result.error().message("未找到该记录");
+        }
+
+        // 避免修改uid,和create_time
+        bookeepModel.setUid(null);
+        bookeepModel.setCreateTime(null);
+        bookeepModel.setUpdateTime(timeStamp);
+        Long updateNum = null;
+        try {
+            // 使用限定字段方式避免其他字段被修改
+            updateNum = D.M(bookeepModel).save();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(updateNum == null) {
+            return Result.error().message("修改记录失败~");
+        }
+        return Result.ok().message("修改成功~");
+    }
+
+    // 删除
+    @ApiOperation(value = "删除财务记录")
+    @PostMapping("delete")
+    public Result delete(
+            @ApiGroup(BookeepGroups.Delete.class)
+            @Validated(BookeepGroups.Delete.class)
+            @RequestBody BookeepModel bookeepModel,
+            HttpServletRequest request
+    ) {
+        Long uid = FuncUtil.getUid(request);
+        Long id =bookeepModel.getId();
+        Long deleteNum = null;
+        try {
+            deleteNum = D.M(BookeepModel.class).where("id=? and uid=?", id, uid).delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(deleteNum == null) {
+            return Result.error().message("删除记录失败~");
+        }
+        if(deleteNum == 0) {
+            return Result.error().message("该记录未找到~");
+        }
+        return Result.ok().message("删除成功~");
+    }
 }
