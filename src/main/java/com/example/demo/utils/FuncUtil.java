@@ -17,9 +17,10 @@ public class FuncUtil {
 
     /**
      * 获得一个UUID
+     *
      * @return String UUID
      */
-    public static String getUUID(){
+    public static String getUUID() {
         String uuid = UUID.randomUUID().toString();
         //去掉“-”符号
 //        return uuid.replaceAll("-", "");
@@ -28,14 +29,15 @@ public class FuncUtil {
 
     /**
      * 获得一个随机字符串
+     *
      * @return String str
      */
-    public static String getRandomString(int length){
-        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random= new Random();
-        StringBuffer sb=new StringBuffer();
-        for(int i=0;i<length;i++){
-            int number=random.nextInt(62);
+    public static String getRandomString(int length) {
+        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(62);
             sb.append(str.charAt(number));
         }
         return sb.toString();
@@ -44,7 +46,16 @@ public class FuncUtil {
     /**
      * 获取精确到秒的时间戳
      */
-    public static Long getTimeStamp(){
-        return Long.valueOf(System.currentTimeMillis()/1000);
+    public static Long getTimeStamp() {
+        return Long.valueOf(System.currentTimeMillis() / 1000);
+    }
+
+    /**
+     * 获取精确到秒的时间戳
+     */
+    public static Double twoDouble(Double value) {
+        long l1 = Math.round(value * 100); //四舍五入
+        double ret = l1 / 100.0; //注意：使用 100.0 而不是 100
+        return ret;
     }
 }

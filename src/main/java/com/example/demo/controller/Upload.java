@@ -35,16 +35,16 @@ import java.util.HashMap;
 @RestController
 public class Upload {
 
-    SimpleDateFormat sdf=new SimpleDateFormat("yyyy/MM/dd/");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
 
     @ApiOperation(value = "单个文件上传", notes = "上传单个文件，通过携带的token", httpMethod = "POST")
     @PostMapping("/upload")
-    public Result upload(@ApiParam(name="file",value="file",required=true) @RequestParam("file") MultipartFile file, HttpServletRequest request){
-        if (file.isEmpty()){
+    public Result upload(@ApiParam(name = "file", value = "file", required = true) @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        if (file.isEmpty()) {
             return Result.error().message("未选择文件");
         }
-        HashMap<String, Object> map  = saveFile(file);
-        if(map != null) {
+        HashMap<String, Object> map = saveFile(file);
+        if (map != null) {
 //            保存到数据库
             Object userId = request.getAttribute("userId");
             long uid = Long.valueOf(String.valueOf(userId));
@@ -66,7 +66,7 @@ public class Upload {
                 e.printStackTrace();
             }
 
-            if(id != 0) {
+            if (id != 0) {
                 map.put("uuid", uuid);
                 return Result.ok().message("上传成功").data(map);
             } else {
@@ -89,16 +89,16 @@ public class Upload {
 //        return Result.ok().message("上传成功");
 //    }
 
-    private HashMap<String, Object> saveFile(MultipartFile file){
+    private HashMap<String, Object> saveFile(MultipartFile file) {
 //        处理存放文件的目录
         try {
-            File path=new File(ResourceUtils.getURL("classpath:").getPath());
-            if(!path.exists()){
-                path=new File("");
+            File path = new File(ResourceUtils.getURL("classpath:").getPath());
+            if (!path.exists()) {
+                path = new File("");
             }
-            String format=sdf.format(new Date());
-            File uploadFolder=new File(path.getAbsolutePath(),"static/upload/" + format);
-            if(!uploadFolder.exists()){
+            String format = sdf.format(new Date());
+            File uploadFolder = new File(path.getAbsolutePath(), "static/upload/" + format);
+            if (!uploadFolder.exists()) {
                 uploadFolder.mkdirs();
                 System.out.println(uploadFolder.getAbsolutePath());
                 //在开发测试模式时，得到地址为：{项目跟目录}/target/static/images/upload/
@@ -108,7 +108,7 @@ public class Upload {
             String filename = file.getOriginalFilename(); //获取上传文件原来的名称
             String ext = getExt(filename);
             String newFilename = getNewFileName(filename);
-            File localFile = new File(uploadFilePath + '/' +newFilename);
+            File localFile = new File(uploadFilePath + '/' + newFilename);
             System.out.println(localFile);
             file.transferTo(localFile); //把上传的文件保存至本地static/upload
 
@@ -125,7 +125,7 @@ public class Upload {
         }
     }
 
-//    新文件名
+    //    新文件名
     public String getNewFileName(String filename) {
         String extension = getExt(filename);
         Long timeMillis = System.currentTimeMillis();

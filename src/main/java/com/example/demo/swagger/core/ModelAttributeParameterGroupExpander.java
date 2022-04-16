@@ -1,5 +1,9 @@
 package com.example.demo.swagger.core;
 
+import com.example.demo.swagger.annotation.ApiGroup;
+import com.example.demo.swagger.annotation.ApiGroupProperties;
+import com.example.demo.swagger.annotation.ApiGroupProperty;
+import com.example.demo.swagger.util.ReflectUtils;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
@@ -9,13 +13,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-import com.example.demo.swagger.annotation.ApiGroup;
-import com.example.demo.swagger.annotation.ApiGroupProperties;
-import com.example.demo.swagger.annotation.ApiGroupProperty;
-import com.example.demo.swagger.util.ReflectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
@@ -108,35 +109,32 @@ public class ModelAttributeParameterGroupExpander extends ModelAttributeParamete
         /*用来记录字段和ApiGroupProperty的关系*/
         Map<String, ApiGroupProperty> apiGroupPropertyMap = new HashMap<String, ApiGroupProperty>();
 
-        try {
-            for (Field field : paramTypeClass.getDeclaredFields()) {
-                /*包含当前group属性的放入propertyDescriptors*/
-                ApiGroupProperties apiGroupProperties = field.getAnnotation(ApiGroupProperties.class);
-                ApiGroupProperty[] apiGroupPropertyArray = null;
-                if (apiGroupProperties != null) {
-                    apiGroupPropertyArray = apiGroupProperties.value();
-                } else {
-                    apiGroupPropertyArray = new ApiGroupProperty[]{field.getAnnotation(ApiGroupProperty.class)};
-                }
-                outter:
-                for (ApiGroupProperty apiGroupProperty : apiGroupPropertyArray) {
-                    if (apiGroupProperty != null) {
-                        for (Class<?> groupClazz : apiGroupProperty.value()) {
-                            if (groupClazz.equals(currentGroupClazz)) {
-                                /*把包含当前组注解的字段propertyDescriptors(里面的字段会解析展示到接口文档上)*/
-                                propertyDescriptors.add(new PropertyDescriptor(field.getName(), paramTypeClass));
-                                /*如果有自定义的字段描述则放到apiGroupPropertyMap以便后面替换掉接口文档上的字段描述*/
-                                if (StringUtils.isNotBlank(apiGroupProperty.description())) {
-                                    apiGroupPropertyMap.put(field.getName(), apiGroupProperty);
-                                }
-                                break outter;
+        for (Field field : paramTypeClass.getDeclaredFields()) {
+            /*包含当前group属性的放入propertyDescriptors*/
+            ApiGroupProperties apiGroupProperties = field.getAnnotation(ApiGroupProperties.class);
+            ApiGroupProperty[] apiGroupPropertyArray = null;
+            if (apiGroupProperties != null) {
+                apiGroupPropertyArray = apiGroupProperties.value();
+            } else {
+                apiGroupPropertyArray = new ApiGroupProperty[]{field.getAnnotation(ApiGroupProperty.class)};
+            }
+            outter:
+            for (ApiGroupProperty apiGroupProperty : apiGroupPropertyArray) {
+                if (apiGroupProperty != null) {
+                    for (Class<?> groupClazz : apiGroupProperty.value()) {
+                        if (groupClazz.equals(currentGroupClazz)) {
+                            /*把包含当前组注解的字段propertyDescriptors(里面的字段会解析展示到接口文档上)*/
+//                                propertyDescriptors.add(new PropertyDescriptor(field.getName(), paramTypeClass));
+                            propertyDescriptors.add(BeanUtils.getPropertyDescriptor(paramTypeClass, field.getName()));
+                            /*如果有自定义的字段描述则放到apiGroupPropertyMap以便后面替换掉接口文档上的字段描述*/
+                            if (StringUtils.isNotBlank(apiGroupProperty.description())) {
+                                apiGroupPropertyMap.put(field.getName(), apiGroupProperty);
                             }
+                            break outter;
                         }
                     }
                 }
             }
-        } catch (IntrospectionException e) {
-            e.printStackTrace();
         }
 
         parameters = expand(context, propertyDescriptors);

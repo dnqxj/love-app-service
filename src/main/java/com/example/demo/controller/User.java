@@ -30,11 +30,12 @@ public class User {
         String username = loginReqVo.getUsername();
         String password = loginReqVo.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
-        UserModel userModel = new UserModel();
+        UserModel userModel;
         try {
             userModel  = D.M(UserModel.class).where("username=? and password=?", username, password).find();
         } catch (Exception e) {
             e.printStackTrace();
+            return Result.error().message("用户未找到");
         }
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -43,6 +44,7 @@ public class User {
             httpServletResponse.addHeader("Access-Control-Expose-Headers", "Authorization");
             httpServletResponse.setHeader("Authorization", token);
             HashMap<String, Object> dataHashMap = new HashMap<>();
+            userModel.setPassword(null);
             dataHashMap.put("user", userModel);
             dataHashMap.put("token", token);
             hashMap.put("data", dataHashMap);

@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-@ApiModel(value="账单月统计数据", description="" )
+@ApiModel(value = "账单月统计数据", description = "")
 @Data
 public class BookeepMonthInfoModel {
 
@@ -15,8 +15,8 @@ public class BookeepMonthInfoModel {
     private Integer month;
 
     @ApiModelProperty(value = "当月支出")
-    private Double expenditureTotla;
+    private Double expenditureTotal;
 
     @ApiModelProperty(value = "当月收入")
-    private Double incomeTotla;
+    private Double incomeTotal;
 }

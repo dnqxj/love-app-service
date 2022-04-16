@@ -28,14 +28,14 @@ import java.util.Objects;
 public class Bookeep {
 
     @ApiResponses({
-            @ApiResponse(code = 200,message = "OK",response = BookeepMonthDetailsModel.class),
+            @ApiResponse(code = 200, message = "OK", response = BookeepMonthDetailsModel.class),
     })
     @ApiOperation(value = "查询月份详情")
     @GetMapping(path = "/month_details")
     public Result monthDetails(
             @ApiGroup(BookeepGroups.MonthDetails.class)
             @Validated(BookeepGroups.MonthDetails.class)
-            @RequestBody BookeepModel bookeepModel,
+                    BookeepModel bookeepModel,
             HttpServletRequest request
     ) {
         // 用户ID
@@ -48,7 +48,7 @@ public class Bookeep {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(list == null) {
+        if (list == null) {
             return Result.error().message("获取失败，请刷新重试");
         }
 
@@ -56,30 +56,30 @@ public class Bookeep {
         BookeepMonthInfoModel info = new BookeepMonthInfoModel();
         info.setYear(year);
         info.setMonth(month);
-        Double expenditureTotla = 0.0;
-        Double incomeTotla = 0.0;
+        Double expenditureTotal = 0.0;
+        Double incomeTotal = 0.0;
         // 处理list，整合同一天的数据
         List<BookeepDayModel> dayList = new ArrayList<>();
         HashMap<String, BookeepDayModel> dayMap = new HashMap<>();
-        for (int i=0;i<list.size(); i++) {
+        for (int i = 0; i < list.size(); i++) {
             // 统计当月总和
             BookeepModel bookeepModelItem = list.get(i);
-            if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
-                expenditureTotla += bookeepModelItem.getTotal();
-            } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
-                incomeTotla += bookeepModelItem.getTotal();
+            if (Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                expenditureTotal += bookeepModelItem.getTotal();
+            } else if (Objects.equals(bookeepModelItem.getType(), "income")) {
+                incomeTotal += bookeepModelItem.getTotal();
             }
 
 
-            String date = year.toString()  + '-' + month.toString() + '-' + bookeepModelItem.getDay().toString();
+            String date = year.toString() + '-' + month.toString() + '-' + bookeepModelItem.getDay().toString();
             BookeepDayModel bookeepDayModel = new BookeepDayModel();
             // 该日期没有数据
-            if(dayMap.get(date) == null) {
+            if (dayMap.get(date) == null) {
                 bookeepDayModel.setDate(date);
-                if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                if (Objects.equals(bookeepModelItem.getType(), "expenditure")) {
                     bookeepDayModel.setExpenditure(bookeepModelItem.getTotal());
                     bookeepDayModel.setIncome(0.0);
-                } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
+                } else if (Objects.equals(bookeepModelItem.getType(), "income")) {
                     bookeepDayModel.setIncome(bookeepModelItem.getTotal());
                     bookeepDayModel.setExpenditure(0.0);
                 }
@@ -90,10 +90,10 @@ public class Bookeep {
             } else {
                 // 循环中已存在该日期的数据
                 bookeepDayModel = dayMap.get(date);
-                if(Objects.equals(bookeepModelItem.getType(), "expenditure")) {
+                if (Objects.equals(bookeepModelItem.getType(), "expenditure")) {
                     // 累加数据
                     bookeepDayModel.setExpenditure(bookeepDayModel.getExpenditure() + bookeepModelItem.getTotal());
-                } else if(Objects.equals(bookeepModelItem.getType(),"income")) {
+                } else if (Objects.equals(bookeepModelItem.getType(), "income")) {
                     bookeepDayModel.setIncome(bookeepDayModel.getIncome() + bookeepModelItem.getTotal());
                 }
                 bookeepDayModel.getChildren().add(bookeepModelItem);
@@ -102,11 +102,16 @@ public class Bookeep {
         }
 
         // 将处理后的日期：对象 数据，放到列表中
+        BookeepDayModel bookeepDayModelNew = new BookeepDayModel();
         for (String key : dayMap.keySet()) {
-            dayList.add(dayMap.get(key));
+            // 处理小数点
+            bookeepDayModelNew = dayMap.get(key);
+            bookeepDayModelNew.setExpenditure(FuncUtil.twoDouble((bookeepDayModelNew.getExpenditure())));
+            bookeepDayModelNew.setIncome(FuncUtil.twoDouble((bookeepDayModelNew.getIncome())));
+            dayList.add(bookeepDayModelNew);
         }
-        info.setExpenditureTotla(expenditureTotla);
-        info.setIncomeTotla(incomeTotla);
+        info.setExpenditureTotal(FuncUtil.twoDouble(expenditureTotal));
+        info.setIncomeTotal(FuncUtil.twoDouble(incomeTotal));
 
         HashMap<String, Object> hashMap = new HashMap<>();
 //        hashMap.put("list", list);
@@ -126,7 +131,7 @@ public class Bookeep {
     ) {
         Long uid = FuncUtil.getUid(request);
         String type = bookeepModel.getType();
-        if(!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
+        if (!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
             return Result.error().message("财务类型错误");
         }
         Long timeStamp = FuncUtil.getTimeStamp();
@@ -141,7 +146,7 @@ public class Bookeep {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(insertNum == null) {
+        if (insertNum == null) {
             return Result.error().message("新增记录失败~");
         }
         return Result.ok().message("新增成功~");
@@ -158,7 +163,7 @@ public class Bookeep {
     ) {
         Long uid = FuncUtil.getUid(request);
         String type = bookeepModel.getType();
-        if(!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
+        if (!Objects.equals(type, "expenditure") && !Objects.equals(type, "income")) {
             return Result.error().message("财务类型错误");
         }
         Long timeStamp = FuncUtil.getTimeStamp();
@@ -169,7 +174,7 @@ public class Bookeep {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(oldBookeepModel == null) {
+        if (oldBookeepModel == null) {
             return Result.error().message("未找到该记录");
         }
 
@@ -184,7 +189,7 @@ public class Bookeep {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(updateNum == null) {
+        if (updateNum == null) {
             return Result.error().message("修改记录失败~");
         }
         return Result.ok().message("修改成功~");
@@ -200,17 +205,17 @@ public class Bookeep {
             HttpServletRequest request
     ) {
         Long uid = FuncUtil.getUid(request);
-        Long id =bookeepModel.getId();
+        Long id = bookeepModel.getId();
         Long deleteNum = null;
         try {
             deleteNum = D.M(BookeepModel.class).where("id=? and uid=?", id, uid).delete();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(deleteNum == null) {
+        if (deleteNum == null) {
             return Result.error().message("删除记录失败~");
         }
-        if(deleteNum == 0) {
+        if (deleteNum == 0) {
             return Result.error().message("该记录未找到~");
         }
         return Result.ok().message("删除成功~");
