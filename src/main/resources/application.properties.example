@@ -8,3 +8,4 @@ jdbcUrl = jdbc:mysql://123.60.174.92:3306/app_orangemust?useUnicode=true&charact
 dataSource.user = app_orangemust
 dataSource.password = CkLGfTMTn8e4z2WZ
 dataSource.driverClassName=com.mysql.jdbc.Driver
+# dataSource.tablePrefix = t_
