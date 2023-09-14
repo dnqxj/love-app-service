@@ -6,11 +6,11 @@
  * @Descripttion:
 -->
 
-# test_app_java
+# love-app-service
 
-flutter 恋爱 app，后端代码
+小橙遇爱 APP 服务端
 
-# 直接使用接口
+## 直接使用接口
 
 1、线上文档位置
 
@@ -63,19 +63,35 @@ password: root
 
 2、将根目录的 sql 文件导入数据库
 
-数据库配置文件位置：/src/main/java/com.example.demo/DemoApplication
+## 项目启动
 
-```java
-    public static void main(String[] args) {
-        try {
-            // 测试
-            D.setDbConfig("jdbc:mysql://127.0.0.1:3306/app_orangemust?useUnicode=true&characterEncoding=UTF-8&useSSL=false","root","root");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        SpringApplication.run(DemoApplication.class, args);
-    }
+### 复制项目
+
 ```
+git clone https://github.com/dnqxj/love-app-service.git
+```
+
+### 创建项目配置文件(本地)
+
+本地实例文件为本地连接测试数据库配置
+
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+
+i、将该配置文件内容写入到 src/main/resources/application.properties
+
+ii、并修改 静态资源位置 为本机位置
+
+### 启动服务
+
+### api 文档位置
+
+1、本地启动后
+
+http://localhost:port/swagger-ui.html
+
+2、线上文档位置
+
+http://app.orangemust.com/swagger-ui.html
 
 ## 日志
 
