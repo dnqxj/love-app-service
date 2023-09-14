@@ -8,13 +8,9 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
-import springfox.documentation.service.ResponseMessage;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Swagger2的接口配置
@@ -29,7 +25,7 @@ public class SwaggerConfigImpl {
     @Bean
     public Docket axtRestApi() {
         // 设置全局响应状态码
-        List<ResponseMessage> responseMessageList = new ArrayList<>();
+        // List<ResponseMessage> responseMessageList = new ArrayList<>();
         // responseMessageList.add(new
         // ResponseMessageBuilder().code(404).message("找不到资源").responseModel(new
         // ModelRef("ApiError")).build());

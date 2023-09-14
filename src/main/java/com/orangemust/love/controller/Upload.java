@@ -116,7 +116,7 @@ public class Upload {
             System.out.println(localFile);
             file.transferTo(localFile); // 把上传的文件保存至本地static/upload
 
-            HashMap<String, Object> map = new HashMap();
+            HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("original_name", filename);
             map.put("name", localFile.getName());
             map.put("url_path", "/upload/" + format + newFilename);
