@@ -323,8 +323,7 @@ public class ModelAttributeParameterGroupExpander extends ModelAttributeParamete
 
     private Predicate<ModelAttributeField> simpleType() {
         return and(not(isCollection()), not(isMap()),
-                or(
-                        belongsToJavaPackage(),
+                or(belongsToJavaPackage(),
                         isBaseType(),
                         isEnum()));
     }
