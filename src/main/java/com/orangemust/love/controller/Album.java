@@ -1,11 +1,11 @@
 package com.orangemust.love.controller;
 
 import com.llqqww.thinkjdbc.D;
-import com.orangemust.love.model.AlbumModel;
-import com.orangemust.love.model.ResourcesModel;
-import com.orangemust.love.response.Result;
-import com.orangemust.love.swagger.annotation.ApiGroup;
-import com.orangemust.love.utils.FuncUtil;
+import com.orangemust.core.response.Result;
+import com.orangemust.core.swagger.annotation.ApiGroup;
+import com.orangemust.love.entity.AlbumModel;
+import com.orangemust.love.entity.Resources;
+import com.orangemust.core.utils.FuncUtil;
 import com.orangemust.love.validate.group.AlbumGroups;
 
 import io.swagger.annotations.Api;
@@ -54,9 +54,9 @@ public class Album {
         Long uid = FuncUtil.getUid(request);
         // 检查该资源uuid是否真实存在
         String resourcesUuid = albumModel.getResourcesUuid();
-        ResourcesModel resourcesModel;
+        Resources resourcesModel;
         try {
-            resourcesModel = D.M(ResourcesModel.class).where("uid=? and uuid=?", uid, resourcesUuid).find();
+            resourcesModel = D.M(Resources.class).where("uid=? and uuid=?", uid, resourcesUuid).find();
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error().message("保存失败~");

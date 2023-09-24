@@ -1,10 +1,10 @@
 package com.orangemust.love.controller;
 
 import com.llqqww.thinkjdbc.D;
-import com.orangemust.love.model.UserModel;
-import com.orangemust.love.response.Result;
-import com.orangemust.love.utils.FuncUtil;
-import com.orangemust.love.utils.JwtUtil;
+import com.orangemust.core.response.Result;
+import com.orangemust.love.entity.UserModel;
+import com.orangemust.core.utils.FuncUtil;
+import com.orangemust.core.utils.JwtUtil;
 import com.orangemust.love.validate.LoginReqVo;
 import com.orangemust.love.validate.RegisterReqVo;
 

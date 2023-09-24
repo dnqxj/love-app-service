@@ -1,10 +1,24 @@
 server.port=8070
 
-web.upload-path=/home/peng.he/Projects/temp/love-app-static
-springboot.mvc.static-path-pattern=/**
-spring.web.resources.static-locations=classpath:/META-INF/resources/,classpath:/static,classpath:/resources/,file:{web.upload-path}
-
 jdbcUrl = jdbc:mysql://123.60.174.92:3306/test_love_app?useUnicode=true&characterEncoding=UTF-8&useSSL=false
 dataSource.user = test_love_app
 dataSource.password = mA4G3mA8RsR2cnyH
 dataSource.driverClassName=com.mysql.jdbc.Driver
+
+server.servlet.encoding.charset=UTF-8
+server.servlet.encoding.force=true
+server.servlet.encoding.enabled=true
+
+## 路径配置
+# 静态资源位置
+path.staticRoot = /home/peng.he/Projects/temp/love-app-static
+# 上传路径
+path.uploadRoot = upload/
+# 上传文件的url资源前缀
+path.urlPath = /upload/
+# 上传资源映射的匹配模式
+path.pathPatterns = /upload/**
+# 上传资源的绝对路径
+path.uploadPath = ${path.staticRoot}${path.uploadRoot}
+# 重要文件上传在上传文件下的路径
+path.importantPath = important/
