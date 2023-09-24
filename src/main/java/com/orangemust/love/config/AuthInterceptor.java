@@ -1,7 +1,7 @@
 package com.orangemust.love.config;
 
 import com.auth0.jwt.interfaces.Claim;
-import com.orangemust.love.utils.JwtUtil;
+import com.orangemust.core.utils.JwtUtil;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
